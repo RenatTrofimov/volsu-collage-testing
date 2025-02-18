@@ -1,89 +1,28 @@
 #include <iostream>
-#include <string>
+
 using namespace std;
 
-class iStream{
-
+class IAplication {
 public:
-
-	virtual void put() = 0;
+    virtual int run() = 0;
+    virtual int stop() = 0;
+};
+class IStream{
+public:
+    virtual int get() = 0;
+    virtual int set(int value) = 0;
+};
+class IStreamOutput : public IStream{
 
 };
+class IStreamInput : public IStream{
 
-class iConvectorable{
-public:
-	virtual void convert() = 0;
 };
-
-class Item{
-	
-};
-
-class ConvectorItemToString: iConvectorable{
-	Item* item;
-	string* aString;
-public:
-	ConvectorItemToJson(Item* item, string* aString){
-		this->item =  item;
-		this->aString =  aString;
-	}
-	virtual void convert() = 0;
-};
-
-class ConvectorStringToItem: iConvectorable{
-	Item* item;
-	string* aString;
-public:
-	ConvectorStringToItem(Item* item, string* aString){
-		this->item =  item;
-		this->json =  aString;
-	}
-	virtual void convert() = 0;
-};
-
-
-class ItemToConsoleOutStream:public iStream{
-	Item* item;
-public:
-	StreamWithItem(Item* item){
-		this->item = item;
-	}
-	void put() override {
-		//cout << item << endl;
-	}
-};
-class ItemFromConsoleInStream:public iStream{
-	Item* item;
-public:
-	StreamWithItem(Item* item){
-		this->item = item;
-	}
-	void put() override {
-		//cout << item << endl;
-	}
-};
-
-class iTask{
-public:
-	virtual void execute() = 0;
-};
-
-class TaskPrintHelloWorld: public iTask{
-
-public:
-
-	void execute() override{
-		cout << "hello world!" << endl;
-	}
-
+class IOperation{
+    virtual bool execute() = 0;
 };
 
 int main(){
-
-iTask *aTask = new TaskPrintHelloWorld;
-aTask->execute();
-
-return 0;
-
+    
+    return 0;
 }
-
