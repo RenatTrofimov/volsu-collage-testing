@@ -23,6 +23,5 @@ class IOperation{
 };
 
 int main(){
-    
     return 0;
 }
