@@ -3,24 +3,25 @@
 #include "Libs/Operations.h"
 #include <fakeit.hpp>
 
-template<typename Type>
-class MockOperation : IOperation<Type> {
+template <typename Type>
+class MockOperation : public IOperation<Type> {
 public:
-    Type* getResult() {
-        return this->result;
-    }
-    Type* getInput() {
-        return this->input;
-    }
-    void setInput(Type *input) {
-        (this->input) = input;
-    }
-    void setResult(Type *result) {
-        (this->result) = result;
-    }
-    void execute() {
+    MockOperation(Type* result, Type* input) : IOperation<Type>(result, input) {}
 
+    // Переопределяем execute() с возможностью проверки вызова
+    void execute() override {
+        executeCalled = true;
+        if (executeBehavior) {
+            executeBehavior(*this->result, *this->input); // Кастомное поведение
+        }
     }
+
+    // Можно добавить проверки
+    bool wasExecuteCalled() const { return executeCalled; }
+
+    // Лямбда для задания поведения
+    std::function<void(Type&, Type&)> executeBehavior;
+    bool executeCalled = false;
 };
 
 
@@ -34,28 +35,15 @@ TEST_CASE("Operation Test") {
     REQUIRE(result == 3);
 }
 
-using namespace fakeit;
-
-TEST_CASE("MockOperation mock with FakeIt") {
-    
+TEST_CASE("IOperation execute is called") {
     int result = 0;
     int input = 42;
-    Mock<MockOperation<int>> mockOp;
-    
-    mockOp.get().setInput(&input);
-    mockOp.get().setResult(&result);
 
-    // Настраиваем поведение execute()
-    When(Method(mockOp, execute)).Do([&]() {
-        int *input = mockOp.get().getInput();
-        int* result = mockOp.get().getResult();
-        *result = *input*2;
-    });
+    MockOperation<int> mockOp(&result, &input);
+    mockOp.executeBehavior = [](int& res, int& in) { res = in * 2; }; // Задаем поведение
 
-    // Вызываем метод
-    mockOp.get().execute();
+    mockOp.execute(); // Вызываем метод
 
-    // Проверяем
-    REQUIRE(result == 84);
-    Verify(Method(mockOp, execute)).Once(); // Проверка вызова
+    REQUIRE(mockOp.wasExecuteCalled()); // Проверяем, что метод вызван
+    REQUIRE(result == 84); // Проверяем результат
 }
